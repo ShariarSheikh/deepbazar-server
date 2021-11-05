@@ -107,9 +107,8 @@ exports.user = async (req, res, next) => {
 
 //upload user profile profileImg
 exports.profileImg = async (req, res, next) => {
-  const { id: _id, imagesFileName } = req.body;
+  const { id: _id, imagesFileName, isUpload } = req.body;
 
-  const isUpload = true;
   const update = {
     profileImg: isUpload
       ? `http://localhost:9000/user_profile/${req.file.filename}`
@@ -123,7 +122,10 @@ exports.profileImg = async (req, res, next) => {
         .status(404)
         .json({ success: false, message: "Not found with this id" });
     } else {
-      !isUpload && (await unlink("upload/user_profile/" + imagesFileName));
+      if (imagesFileName) {
+        await unlink("upload/user_profile/" + imagesFileName);
+      }
+
       const updateImg = await AuthModel.findByIdAndUpdate(_id, update, {
         new: true,
       });
@@ -137,11 +139,34 @@ exports.profileImg = async (req, res, next) => {
         res.status(200).json({
           success: true,
           message: isUpload ? "Uploaded successfully" : "Deleted successfully",
+          updateImg,
         });
       }
     }
   } catch (error) {
     await unlink("upload/user_profile/" + req.file.filename);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+//delete user account
+exports.deleteUser = async (req, res, next) => {
+  const id = req.query.id;
+  const imagesFileName = req.query.imagesFileName;
+
+  try {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      res
+        .status(404)
+        .json({ success: false, message: "Not found with this id" });
+    }
+    await AuthModel.findByIdAndDelete(id);
+
+    if (imagesFileName) {
+      await unlink("upload/user_profile/" + imagesFileName);
+    }
+    res.status(200).json({ success: true, message: "Your Account deleted" });
+  } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };

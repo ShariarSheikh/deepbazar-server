@@ -1,5 +1,11 @@
 const express = require("express");
-const { login, register, user, profileImg } = require("../controllers/auth");
+const {
+  login,
+  register,
+  user,
+  profileImg,
+  deleteUser,
+} = require("../controllers/auth");
 const { protect, upload } = require("../middleware/auth");
 
 const router = express.Router();
@@ -11,5 +17,6 @@ router
   .route("/update-profileImg")
   .patch(upload.single("profileImg"), profileImg);
 
+router.route("/delete-user").delete(deleteUser);
 
 module.exports = router;
