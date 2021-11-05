@@ -111,7 +111,7 @@ exports.profileImg = async (req, res, next) => {
 
   const update = {
     profileImg: isUpload
-      ? `http://localhost:9000/user_profile/${req.file.filename}`
+      ? `https://glacial-everglades-31210.herokuapp.com/user_profile/${req.file.filename}`
       : "",
     imagesFileName: isUpload ? req.file.filename : "",
   };
